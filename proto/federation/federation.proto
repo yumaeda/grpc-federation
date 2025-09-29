@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package federation;
+
+import "grpc/federation/federation.proto";
+import "post/post.proto";
+import "user/user.proto";
+
+option go_package = "example/federation;federation";
+
+service FederationService {
+  option (grpc.federation.service) = {};
+  rpc GetPost (GetPostRequest) returns (GetPostReply) {};
+}
+
+message GetPostRequest {
+  string id = 1;
+}
+
+message GetPostReply {
+  option (grpc.federation.message) = {
+    def {
+      name: "p"
+      message {
+        name: "Post"
+        args { name: "pid", by: "$.id" }
+      }
+    }
+  };
+  Post post = 1 [(grpc.federation.field).by = "p"];
+}
+
+message Post {
+  option (grpc.federation.message) = {
+    // call post.PostService/GetPost method with post_id and binds the response message to `res` variable
+    def {
+      name: "res"
+      call {
+        method: "post.PostService/GetPost"
+        request { field: "post_id", by: "$.pid" }
+      }
+    }
+    
+    // refer to `res` variable and access post field.
+    // Use autobind feature with the retrieved value.
+    def {
+        name: "post"
+        by: "res.post"
+        autobind: true
+    }
+
+    // get User message and assign it to `u` variable.
+    // The `post` variable is referenced to retrieve the `user_id`, and the value is named `uid` as an argument for User message.
+    def {
+      name: "u"
+      message {
+        name: "User"
+        args { name: "uid", by: "post.user_id" }
+      }
+    }
+  };
+
+  string id = 1; // binds the value of `res.post.id` by autobind feature
+  string title = 2; // binds the value of `res.post.title` by autobind feature
+  string content = 3; // binds the value of `res.post.content` by autobind feature
+
+  // binds `u` variable to user field.
+  User user = 4 [(grpc.federation.field).by = "u"];
+}
+
+message User {
+  option (grpc.federation.message) = {
+    def [
+      {
+        name: "res"
+        call {
+          method: "user.UserService/GetUser"
+          request { field: "user_id", by: "$.uid" }
+        }
+      },
+      {
+        by: "res.user"
+        autobind: true
+      }
+    ]
+  };
+
+  string id = 1;
+  string name = 2;
+  int64 age = 3;  
+}
