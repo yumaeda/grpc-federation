@@ -7,6 +7,11 @@ Try out gRPC Federation
 brew install bufbuild/buf/buf
 ```
 
+### Update dependencies to download the grpc-federation proto files
+```sh
+buf mod update proto
+```
+
 ## Use gRPC Federation
 ```sh
 buf generate

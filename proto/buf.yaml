@@ -1,0 +1,15 @@
+version: v1
+# Dependencies shared by all modules in the workspace. Must be modules hosted in the Buf Schema Registry.
+# The resolution of these dependencies is stored in the buf.lock file.
+deps:
+  - buf.build/mercari/grpc-federation
+# The default lint configuration for any modules that don't have a specific lint configuration.
+# If this section isn't present, AND a module doesn't have a specific lint configuration, the default
+# lint configuration is used for the module.
+lint:
+  use:
+    - STANDARD
+# Default breaking configuration. It behaves the same as the default lint configuration.
+breaking:
+  use:
+    - FILE

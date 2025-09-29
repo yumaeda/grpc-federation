@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package example.bff;
+
+import "grpc/federation/federation.proto";
+
+option go_package = "example/bff;bff";
+
+service BFF {
+  option (grpc.federation.service) = {};
+  rpc Get(GetRequest) returns (GetResponse) {};
+}
+
+message GetRequest {}
+message GetResponse {
+  option (grpc.federation.message).custom_resolver = true;
+}
